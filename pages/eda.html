@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EDA Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .charts-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 10px;
+            width: 500px;
+        }
+
+        .chart-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .chart-title {
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Exploratory Data Analysis Results</h1>
+
+    <div class="charts-container">
+        {% for chart_url in charts %}
+        <div class="chart-card">
+            <img src="{{ chart_url }}" alt="EDA Chart">
+            <div class="chart-title">{{ chart_url.split('/')[-1].replace('_', ' ').replace('.png', '').title() }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

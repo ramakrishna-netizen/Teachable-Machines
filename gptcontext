@@ -1,0 +1,149 @@
+Here's a more comprehensive context including both the UI modifications and backend functionality requirements for the Teachable Machine application:
+
+Teachable Machine - Full Stack Implementation Guide
+
+Frontend Overview
+
+The Teachable Machine is a web application that allows users to:
+
+Create and manage classification classes
+
+Upload image samples for each class
+
+Train a machine learning model based on these samples
+
+Export the trained model for use in other applications
+
+UI Components
+
+We modified a Teachable Machine interface by replacing the menu-dots icon with a delete icon for class management.
+
+Key UI components include:
+
+Class cards with edit and delete functionality
+
+Upload buttons for adding image samples
+
+Class addition mechanism via "Add a class" button
+
+Training section with a train button and advanced settings
+
+Export section for trained models
+
+Backend Functionality Requirements
+
+1. Class Management API
+
+POST /api/classes - Create a new class
+GET /api/classes - List all classes
+PUT /api/classes/{id} - Update class name
+DELETE /api/classes/{id} - Delete class and its samples
+
+
+2. Sample Management API
+
+POST /api/classes/{id}/samples - Upload new samples
+GET /api/classes/{id}/samples - Get samples for a class
+DELETE /api/classes/{id}/samples/{sampleId} - Delete a sample
+
+
+3. Model Training API
+
+POST /api/train - Start model training process
+GET /api/train/status - Check training status
+GET /api/train/results - Get training results
+
+
+4. Model Export API
+
+GET /api/export - Get the trained model in required format
+POST /api/export/settings - Configure export settings
+
+
+Data Models
+
+Class
+
+{
+  "id": "string",
+  "name": "string",
+  "createdAt": "datetime",
+  "updatedAt": "datetime",
+  "sampleCount": "integer"
+}
+
+
+Sample
+
+{
+  "id": "string",
+  "classId": "string",
+  "fileUrl": "string",
+  "thumbnailUrl": "string",
+  "createdAt": "datetime",
+  "metadata": "object"
+}
+
+
+TrainingJob
+
+{
+  "id": "string",
+  "status": "enum(pending, training, completed, failed)",
+  "progress": "float",
+  "startedAt": "datetime",
+  "completedAt": "datetime",
+  "accuracy": "float",
+  "settings": "object"
+}
+
+
+Technical Implementation Notes
+
+Frontend
+
+HTML/CSS/JavaScript application
+
+Uses SVG for icons
+
+Animation effects for dynamic elements
+
+No external frontend framework used (could be enhanced with React/Vue)
+
+Backend Requirements
+
+RESTful API architecture
+
+Image processing capabilities
+
+Machine learning model training functionality
+
+Authentication & authorization system
+
+Database for class/sample storage
+
+File storage for images and trained models
+
+Machine Learning Integration
+
+TensorFlow.js or TensorFlow backend
+
+Transfer learning capabilities
+
+Image classification model architecture
+
+Model export functionality (TF.js, TFLite, etc.)
+
+Deployment Considerations
+
+Database selection (PostgreSQL, MongoDB)
+
+Image storage solution (S3, GCS)
+
+Model training infrastructure (CPU/GPU requirements)
+
+Scalability for multiple users
+
+Security for user data protection
+
+This comprehensive context provides both the UI aspects we've already modified and outlines the backend functionality that would be needed to complete the application. You can use this as a roadmap for implementing the complete system in the future.

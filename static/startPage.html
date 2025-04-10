@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Start Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+      color: #333;
+    }
+
+
+    main {
+      padding: 2rem;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    section {
+      margin-bottom: 2rem;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #4f46e5;
+    }
+
+    .upload-preview img {
+      width: 100px;
+      margin: 5px;
+      border-radius: 8px;
+    }
+
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      height: 200px;
+    }
+
+    .bar {
+      background: #6366f1;
+      width: 40px;
+      text-align: center;
+      color: white;
+      border-radius: 5px 5px 0 0;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #3730a3;
+    }
+
+    .upload-preview {
+      margin-top: 20px;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+
+
+    header {
+      background: #4f46e5;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Teachable Machine - Image Model Trainer</h1>
+  </header>
+
+
+
+  <section>
+    <h2>1. Upload Dataset (CSV for EDA)</h2>
+    <input type="file" id="datasetUpload" accept=".csv,.xlsx,.xls">
+    <div class="upload-preview" id="preview"></div>
+    <br>
+    <button class="btn-primary" id="uploadDatasetBtn">Get EDA</button>
+  </section>
+
+
+  <section>
+    <h2>2. Train Model</h2>
+    <!-- <button onclick="document.location='./pages/train.html'">Train Model</button> -->
+    <button onclick="window.open('/train', '_blank')">Train Model</button>
+
+    <div id="trainingStatus"></div>
+  </section>
+
+  <script>
+    document.getElementById("uploadDatasetBtn").addEventListener("click", async function () {
+      const fileInput = document.getElementById("datasetUpload");
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert("Please select a dataset file first.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("dataset", file);  // must match what Flask is expecting
+
+      try {
+        const response = await fetch("/eda", {
+          method: "POST",
+          body: formData
+        });
+
+        const html = await response.text(); // Expect HTML from Flask
+        const newWindow = window.open("", "_blank");
+        newWindow.document.open();
+        newWindow.document.write(html);
+        newWindow.document.close();
+
+      } catch (error) {
+        alert("Failed to upload dataset: " + error.message);
+      }
+    });
+  </script>
+
+</body>
+
+</html>

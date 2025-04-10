@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teachable Machine - Image Model Trainer</title>
+  <style>
+    
+  
+  </style>
+</head>
+
+<body>
+ 
+  <main>
+    
+
+    
+</body>
+<script>
+  document.querySelector("button").addEventListener("click", async function () {
+    const fileInput = document.getElementById("imageUpload");
+    const file = fileInput.files[0];
+
+    if (!file) {
+      alert("Please select a dataset file first.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/eda", {
+        method: "POST",
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Redirect to the EDA results page
+        window.location.href = "/eda_page";
+      } else {
+        alert("Error performing EDA");
+      }
+
+    } catch (error) {
+      alert("Failed to upload dataset: " + error.message);
+    }
+  });
+</script>
+
+<!-- <script>
+  const preview = document.getElementById('preview');
+  const edaOutput = document.getElementById('edaOutput');
+
+  document.getElementById('imageUpload').addEventListener('change', function (e) {
+    preview.innerHTML = '';
+    const files = Array.from(e.target.files);
+    const classCounts = {};
+
+    files.forEach(file => {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      preview.appendChild(img);
+
+      const className = file.webkitRelativePath.split('/')[1] || 'Uncategorized';
+      classCounts[className] = (classCounts[className] || 0) + 1;
+    });
+
+    // Display EDA
+    edaOutput.innerHTML = '<h3>Class Distribution</h3><div class="bar-chart">';
+    for (let cls in classCounts) {
+      edaOutput.innerHTML += `
+        <div class="bar" style="height: ${classCounts[cls] * 10}px">
+          ${cls}<br>${classCounts[cls]}
+        </div>
+      `;
+    }
+    edaOutput.innerHTML += '</div>';
+  });
+
+  function trainModel() {
+    document.getElementById('trainingStatus').innerText = 'Training started... (mock)';
+    // This is a placeholder for actual ML model training code
+    setTimeout(() => {
+      document.getElementById('trainingStatus').innerText = 'Training complete (mock)';
+    }, 2000);
+  }
+
+  function testModel() {
+    document.getElementById('testResult').innerText = 'Prediction: Dog (95%) (mock result)';
+  }
+
+  function exportModel() {
+    alert('Model exported (mock export)');
+  }
+</script> -->
+
+</html>

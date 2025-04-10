@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teachable Machine</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-icon {
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .logo {
+            color: #3b82f6;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .class-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 1rem 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .class-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .class-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .edit-icon {
+            opacity: 0.6;
+            cursor: pointer;
+        }
+
+        .delete-icon {
+            cursor: pointer;
+            opacity: 0.6;
+        }
+
+        .class-content {
+            padding: 16px;
+        }
+
+        .sample-label {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .sample-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .sample-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background-color: #f0f4f9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .sample-button:hover {
+            background-color: #e6edf8;
+        }
+
+        .sample-button-icon {
+            color: #3b82f6;
+            margin-bottom: 4px;
+        }
+
+        .sample-button-text {
+            font-size: 12px;
+            color: #3b82f6;
+        }
+
+        .add-class {
+            border: 2px dashed #ccc;
+            border-radius: 36px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .add-class:hover {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        .add-class-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .add-icon {
+            color: #666;
+        }
+
+        .sidebar {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .training-section,
+        .preview-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 0px 7px;
+            width: 48%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .train-button {
+            background-color: #f0f4f9;
+            color: #333;
+            margin-top: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 91%;
+            text-align: center;
+        }
+
+        .train-button:hover {
+            background-color: #e6edf8;
+        }
+
+        .advanced-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .export-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f0f4f9;
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .export-button:hover {
+            background-color: #e6edf8;
+        }
+
+        .preview-message {
+            color: #666;
+            font-size: 14px;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        /* Classes to display connection lines */
+        .connections {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="menu-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+        </div>
+        <div class="logo">Teachable Machine</div>
+    </div>
+
+    <div class="container">
+        <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+
+            <div id="classes-container">
+
+
+                <!-- Class 1 -->
+                <div class="class-card" data-class-id="1">
+                    <div class="class-header">
+                        <div class="class-title">
+                            Class 1
+                            <svg class="edit-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path
+                                    d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89783 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </div>
+
+                    </div>
+                    <div class="class-content">
+                        <div class="sample-label">Add Image Samples:</div>
+                        <div class="preview-thumbnails"></div>
+                        <div class="sample-buttons">
+                            <div class="sample-button">
+                                <input type="file" class="file-input" accept="image/*" multiple data-class="Class 1"
+                                    hidden />
+
+                                <div class="sample-button-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                                <div class="sample-button-text">Upload</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Class 2 -->
+                <div class="class-card" data-class-id="2">
+                    <div class="class-header">
+                        <div class="class-title">
+                            Class 2
+                            <svg class="edit-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path
+                                    d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89783 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </div>
+
+                    </div>
+                    <div class="class-content">
+                        <div class="sample-label">Add Image Samples:</div>
+                        <div class="preview-thumbnails"></div>
+                        <div class="sample-buttons">
+
+                            <div class="sample-button">
+                                <input type="file" class="file-input" accept="image/*" multiple data-class="Class 2"
+                                    hidden />
+
+                                <div class="sample-button-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                                <div class="sample-button-text">Upload</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Class Button -->
+                <div class="add-class" id="add-class-button">
+                    <div class="add-class-text">
+                        <svg class="add-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        Add a class
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="train-button">Upload Dataset</button>
+        </form>
+        <div class="sidebar">
+            <div class="training-section">
+                <div id="training-status" style="text-align:center; color:#555; margin-top:10px;"></div>
+                <div class="section-title">Training</div>
+                <div class="train-button train-button-real">Train Model</div>
+
+            </div>
+            <div class="preview-section">
+                <div class="section-title">Export</div>
+                <div class="export-button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    Export Model
+                </div>
+                <div class="preview-message">
+                    You must train a model on the Top before you can export it here.
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function setupFileInputEvents(classCard) {
+            const input = classCard.querySelector('.file-input');
+            const previewContainer = classCard.querySelector('.preview-thumbnails');
+
+            input.addEventListener('change', function () {
+                previewContainer.innerHTML = ''; // clear previous previews
+
+                const files = Array.from(this.files);
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = file.name;
+                        img.style.width = '60px';
+                        img.style.height = '60px';
+                        img.style.objectFit = 'cover';
+                        img.style.marginRight = '8px';
+                        img.style.borderRadius = '6px';
+                        previewContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+        }
+        // Function to create a new class card
+        function createNewClassCard() {
+            // Get existing classes count to determine the new class number
+            const existingClasses = document.querySelectorAll('.class-card');
+            const newClassNumber = existingClasses.length + 1;
+
+            // Create the new class card element
+            const newClassCard = document.createElement('div');
+            newClassCard.className = 'class-card';
+            newClassCard.dataset.classId = newClassNumber;
+
+            // Set the HTML content for the new class
+            newClassCard.innerHTML = `       
+  <div class="class-header"> 
+    <div class="class-title">
+      Class ${newClassNumber}
+      <svg class="edit-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89783 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="delete-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </div>
+  </div>
+
+  <div class="class-content">
+    <div class="sample-label">Add Image Samples:</div>
+    <div class="preview-thumbnails"></div>
+    <div class="sample-buttons">
+      <div class="sample-button">
+        <input type="file" class="file-input" accept="image/*" multiple data-class="Class ${newClassNumber}" hidden />
+        <div class="sample-button-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="sample-button-text">Upload</div>
+      </div>
+    </div>
+  </div>
+`;
+
+
+            // Get the container and add class button
+            const classesContainer = document.getElementById('classes-container');
+            const addClassButton = document.getElementById('add-class-button');
+
+            // Insert the new class before the add button
+            classesContainer.insertBefore(newClassCard, addClassButton);
+
+            // Add animation effect
+            newClassCard.style.opacity = '0';
+            newClassCard.style.transform = 'translateY(20px)';
+            newClassCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+            // Trigger animation
+            setTimeout(() => {
+                newClassCard.style.opacity = '1';
+                newClassCard.style.transform = 'translateY(0)';
+            }, 10);
+
+
+
+            const dlt_class = newClassCard.querySelector('.delete-icon');
+
+
+            dlt_class.addEventListener('click', function () {
+                newClassCard.remove();
+            });
+
+
+            setupFileInputEvents(newClassCard);
+
+
+            document.querySelectorAll('.edit-icon').forEach(icon => {
+                icon.addEventListener('click', function () {
+                    const titleDiv = this.closest('.class-title');
+                    const currentTitle = titleDiv.childNodes[0].textContent.trim();
+
+                    // Create input element
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = currentTitle;
+                    input.style.fontSize = '16px';
+                    input.style.fontWeight = '600';
+                    input.style.flexGrow = '1';
+                    input.style.border = 'none';
+                    input.style.outline = 'none';
+                    input.style.background = 'transparent';
+
+                    // Replace the current title text node with input
+                    titleDiv.replaceChild(input, titleDiv.childNodes[0]);
+
+                    input.focus();
+
+                    // Update title on blur or Enter
+                    function updateTitle() {
+                        const newTitle = input.value.trim() || currentTitle;
+                        const textNode = document.createTextNode(newTitle + ' ');
+                        titleDiv.replaceChild(textNode, input);
+
+                        // Update data-class attribute of the input
+                        const classCard = titleDiv.closest('.class-card');
+                        const inputFile = classCard.querySelector('.file-input');
+                        if (inputFile) {
+                            inputFile.setAttribute('data-class', newTitle);
+                        }
+                    }
+
+                    input.addEventListener('blur', updateTitle);
+                    input.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter') {
+                            updateTitle();
+                        }
+                    });
+                });
+            });
+        }
+
+
+        // Add event listener to the "Add a class" button
+        document.getElementById('add-class-button').addEventListener('click', createNewClassCard);
+
+
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('.sample-button')) {
+                const button = e.target.closest('.sample-button');
+                const input = button.querySelector('input[type="file"]');
+                input.click();
+            }
+        });
+
+
+        document.getElementById('uploadForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // prevent normal form submission
+
+            const formData = new FormData();
+            const inputs = document.querySelectorAll('.file-input');
+
+            inputs.forEach(input => {
+                const className = input.dataset.class || 'Unknown';
+                const files = input.files;
+                for (let i = 0; i < files.length; i++) {
+                    // Send with path like Class1/image.jpg
+                    formData.append('images', files[i], `${className}/${files[i].name}`);
+                }
+            });
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(res => res.json())
+                .then(data => {
+                    alert(data.message || 'Upload complete!');
+                }).catch(err => {
+                    console.error('Upload failed:', err);
+                });
+        });
+
+        document.querySelectorAll('.file-input').forEach(input => {
+            input.addEventListener('change', function () {
+                const classCard = input.closest('.class-card');
+                const previewContainer = classCard.querySelector('.preview-thumbnails');
+                previewContainer.innerHTML = ''; // Clear previous previews
+
+                Array.from(input.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = file.name;
+                        img.style.width = '60px';
+                        img.style.height = '60px';
+                        img.style.objectFit = 'cover';
+                        img.style.margin = '5px';
+                        img.style.borderRadius = '4px';
+                        previewContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+        });
+        document.querySelector('.train-button-real').addEventListener('click', function () {
+            const statusDiv = document.getElementById('training-status');
+            statusDiv.innerHTML = '🚀 Training in progress... Please wait.';
+
+            fetch('/train', {
+                method: 'POST'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        statusDiv.innerHTML = `✅ ${data.message}<br>
+                    <a href="/static/image_model.h5" download>📥 Download Model</a>`;
+                    } else {
+                        statusDiv.innerHTML = '❌ Training failed. Please try again.';
+                    }
+                })
+                .catch(err => {
+                    statusDiv.innerHTML = '⚠️ Error occurred while training.';
+                    console.error(err);
+                });
+        });
+
+        document.querySelector(".export-button").addEventListener("click", () => {
+            fetch("/export", {
+                method: "POST"
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // Trigger file download
+                        const link = document.createElement("a");
+                        link.href = data.download_url;
+                        link.download = "tfjs_model.zip";
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    } else {
+                        alert("Export failed: " + data.message);
+                    }
+                });
+        });
+
+        document.querySelector(".export-button").addEventListener("click", () => {
+            fetch("/export", {
+                method: "POST"
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // Trigger file download
+                        const link = document.createElement("a");
+                        link.href = data.download_url;
+                        link.download = "tfjs_model.zip";
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    } else {
+                        alert("Export failed: " + data.message);
+                    }
+                });
+        });
+    </script>
+</body>
+
+</html>
